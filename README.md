@@ -1,2 +1,22 @@
 ## EEG browsers
 
+This document provides an overview of [free and open-source software](https://en.wikipedia.org/wiki/Free_and_open-source_software) EEG browsers. I only include tools written with freely available programming languages here, which excludes everything written in MATLAB.
+
+An EEG browser is an application which visualizes certain aspects of [electroencephalographic](https://en.wikipedia.org/wiki/Electroencephalography) (EEG) or similar modalities. Such signals are basically a collection of time series recorded simultaneously from different locations. At the very least, interactively visualizing the time course of these signals is one of the core features of any EEG browser.
+
+Of course, the effectiveness of an EEG browser depends critically on how and which visualization features are implemented. If users can smoothly scroll and zoom through the data in both time and channels, assessing data quality is much easier than when only whole pages of displayed data are updated. Displaying a large quantity of data points smoothly is not trivial.
+
+For example, a typical segment of interest consists of dozens of channels and several seconds of data with a sampling frequency of 512 Hz or higher. This amounts to roughly 300,000 data points that need to be rendered simultaneously. Scrolling forward or backward in time means that new data needs to be visualized almost instantaneously for a smooth user experience. In most cases, this requires some sort of downsampling to process such large amounts of data. In fact, there are only a limited number of pixels available to display the data, so for example drawing 10,000 data points in a window consisting of 1,000 pixels horizontally is both inefficient and not necessary.
+
+In addition to displaying the raw EEG signals, it is also important that EEG browsers support creating and editing annotations. An annotation is a time segment in the data associated with a specific start and stop time, a specific channel (or all channels), and a label (such as "artifact"). An EEG recording can have multiple, possibly overlapping, annotations. An EEG browser needs to support creating annotations (for example using mouse actions such as dragging over a specific data segment), editing and deleting annotations, as well as showing and hiding all or specific types of annotations.
+
+Online data streaming is a bonus feature that some users might find useful to monitor incoming EEG data (such as when recording with [LSL](https://labstreaminglayer.readthedocs.io/index.html)). However, it might be preferrable to have dedicated data streaming viewers for such applications instead of extending EEG browsers with these capabilities.
+
+- [SigViewer](https://github.com/cbrnr/sigviewer) (Windows/macOS/Linux): Written in C++/Qt. Supports multiple file formats. Smooth scrolling. Currently requires that all of the data is loaded into memory.
+- [MNE](https://mne.tools/stable/index.html) (Windows/macOS/Linux): Written in Python. Based on Matplotlib. Supports multiple file formats. Chunky scrolling (page-based). Should also work when data has not been loaded completely into memory.
+- [MNE-Qt-Browser](https://github.com/mne-tools/mne-qt-browser) (Windows/macOS/Linux): Written in Python, based on [PyQtGraph](https://www.pyqtgraph.org/). Works as an alternative browser backend in MNE, which means it supports the same file formats. Relatively smooth scrolling and zooming (but this depends on the platform and settings such as OpenGL). Requires all data to be available in memory.
+- [EDFbrowser](https://www.teuniz.net/edfbrowser/) (Windows/macOS/Linux): Written in C++/Qt. Supports only EDF files. Relatively smooth scrolling. Not officially supported on macOS.
+
+All four browsers use Qt in the background, sometimes directly (SigViewer, EDFbrowser), and sometimes through other packages (PyQtGraph and Matplotlib). Qt does a pretty good job in abstracting away platform idiosyncrasies, but sometimes differences in looks and/or behavior still crop up. This means that if these tools want to support all three major platforms (Windows/macOS/Linux), developing and testing on all three platforms cannot be avoided completely.
+
+This is where web-based tools (running in a modern browser) might come in handy.
