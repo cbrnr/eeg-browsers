@@ -1,16 +1,16 @@
-## EEG browsers
+# EEG browsers
 
-### Introduction
+## Introduction
 
 This document provides an overview of [free and open-source software](https://en.wikipedia.org/wiki/Free_and_open-source_software) EEG browsers. I only include tools written with freely available programming languages here, which excludes everything written in MATLAB.
 
 
-### Definition
+## Definition
 
 An EEG browser is an application which visualizes certain aspects of [electroencephalographic](https://en.wikipedia.org/wiki/Electroencephalography) (EEG) or similar modalities. Such signals are basically a collection of time series recorded simultaneously from different locations. At the very least, interactively visualizing the time course of these signals is one of the core features of any EEG browser.
 
 
-### Core features
+## Core features
 
 Of course, the effectiveness of an EEG browser depends critically on how and which visualization features are implemented. If users can smoothly scroll and zoom through the data in both time and channels, assessing data quality is much easier than when only whole pages of displayed data are updated. Displaying a large quantity of data points smoothly is not trivial.
 
@@ -21,7 +21,7 @@ In addition to displaying the raw EEG signals, it is also important that EEG bro
 Online data streaming is a bonus feature that some users might find useful to monitor incoming EEG data (such as when recording with [LSL](https://labstreaminglayer.readthedocs.io/index.html)). However, it might be preferrable to have dedicated data streaming viewers for such applications instead of extending EEG browsers with these capabilities.
 
 
-### Data formats
+## Data formats
 
 There are dozens of file formats for EEG data. [MNE](https://mne.tools/stable/index.html) (a widely used Python package for EEG/MEG analysis) supports most widely used formats – which means that Python-based EEG browsers can easily import these formats. Once imported, EEG data can be represented as an array of floating point numbers (double precision in most cases).
 
@@ -35,7 +35,7 @@ The most commonly used formats are:
 These formats are also supported by the [BIDS EEG standard](https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/03-electroencephalography.html), and they specifically recommend to use EDF or BrainVision whenever possible.
 
 
-###  Test data
+##  Test data
 
 The [MNE testing data repository](https://github.com/mne-tools/mne-testing-data) contains test files for many formats. Specifically, here are some files for the four formats discussed previously:
 
@@ -45,16 +45,61 @@ The [MNE testing data repository](https://github.com/mne-tools/mne-testing-data)
 - The BDF format is almost identical to EDF ([multiple_annotation_chans.bdf](https://github.com/mne-tools/mne-testing-data/blob/master/BDF/multiple_annotation_chans.bdf))
 
 
-### Available apps
+## Available apps
 
 - [SigViewer](https://github.com/cbrnr/sigviewer) (Windows/macOS/Linux): Written in C++/Qt. Supports multiple file formats. Smooth scrolling. Currently requires that all of the data is loaded into memory.
-- [MNE](https://mne.tools/stable/index.html) (Windows/macOS/Linux): Written in Python. Based on Matplotlib. Supports multiple file formats. Chunky scrolling (page-based). Should also work when data has not been loaded completely into memory (I will test this soon).
-- [MNE-Qt-Browser](https://github.com/mne-tools/mne-qt-browser) (Windows/macOS/Linux): Written in Python, based on [PyQtGraph](https://www.pyqtgraph.org/). Works as an alternative browser backend in MNE, which means it supports the same file formats. Relatively smooth scrolling and zooming (but this depends on the platform and settings such as OpenGL). Should also work when data has not been loaded completely into memory (I will test this soon).
+- [MNE](https://mne.tools/stable/index.html) (Windows/macOS/Linux): Written in Python. Based on Matplotlib. Supports multiple file formats. Chunky scrolling (page-based). Should also work when data has not been loaded completely into memory.
+- [MNE Qt Browser](https://github.com/mne-tools/mne-qt-browser) (Windows/macOS/Linux): Written in Python, based on [PyQtGraph](https://www.pyqtgraph.org/). Works as an alternative browser backend in MNE, which means it supports the same file formats. Relatively smooth scrolling and zooming (but this depends on the platform and settings such as OpenGL). Should also work when data has not been loaded completely into memory.
 - [EDFbrowser](https://www.teuniz.net/edfbrowser/) (Windows/macOS/Linux): Written in C++/Qt. Supports only EDF files. Relatively smooth scrolling. Not officially supported on macOS.
 
-All four browsers use Qt in the background, sometimes directly (SigViewer, EDFbrowser), and sometimes through other packages (PyQtGraph and Matplotlib). Qt does a pretty good job in abstracting away platform idiosyncrasies, but sometimes differences in looks and/or behavior still crop up. This means that if these tools want to support all three major platforms (Windows/macOS/Linux), developing and testing on all three platforms cannot be avoided completely.
+All four browsers use Qt in the background, sometimes directly (SigViewer, EDFbrowser), and sometimes through other packages (PyQtGraph and Matplotlib). Qt does a pretty good job in abstracting away platform idiosyncrasies, but sometimes differences in looks and/or behavior still crop up. This means that if these apps want to support all three major platforms (Windows/macOS/Linux), developing and testing on all three platforms cannot be avoided completely.
+
+The following sections show how to open and browse the test file [test_edf_stim_resamp.edf](https://github.com/mne-tools/mne-testing-data/raw/master/EDF/test_edf_stim_resamp.edf) with each app in turn.
 
 
-### Web-based EEG browsers
+### SigViewer
+
+- Install SigViewer from https://github.com/cbrnr/sigviewer.
+- Open SigViewer (on macOS, you might have to right-click and select "Open" because double-clicking does not work the first time).
+- Select "File" – "Open" and pick the file `test_edf_stim_resamp.edf`.
+- That's it, now the file is open and you can scroll through the data both horizontally and vertically.
+
+
+### MNE
+
+- Create a Python (virtual) environment containing the `mne` package.
+- Put the file in the working directory and run the following script:
+
+    ```python
+    import mne
+
+    mne.viz.set_browser_backend("matplotlib")
+    raw = mne.io.read_raw_edf("test_edf_stim_resamp.edf")
+    raw.plot(block=True)
+    ```
+
+
+### MNE Qt Browser
+
+- Create a Python (virtual) environment containing the `mne` and `mne-qt-browser` packages.
+- Install `PySide6` or `PyQt6`.
+- Put the file in the working directory and run the following script:
+
+    ```python
+    import mne
+
+    mne.viz.set_browser_backend("qt")
+    raw = mne.io.read_raw_edf("test_edf_stim_resamp.edf")
+    raw.plot(block=True)
+    ```
+
+
+### EDFbrowser
+
+EDFbrowser opens only EDF files that are 100% standard-compliant. Unfortunately, the example file we are using here cannot be opened, because it is missing a required channel label (EDF+ mandates that an annotations channel must be present, which is not the case for our file).
+
+
+
+## Web-based EEG browsers
 
 This is where web-based tools (running in a modern browser) might come in handy.
